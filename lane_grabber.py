@@ -126,6 +126,9 @@ print '''Use the keys 1-5 to cycle between the images.
 Left click adds a vertex in the current mouse position.
 Right click deletes the last point.
 
+The keys z, x decrease or increase the vmin of the current image.
+The keys c, v decrease or increase the vmax of the current image.
+ 
 Press <enter> when done, it will print the polygon as a python list.
 
 
