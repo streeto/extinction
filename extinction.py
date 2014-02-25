@@ -60,8 +60,8 @@ dust_region_poly = {'K0708': [(39, 38),
 
 
 # Compute bit masks.
-dust_lane__yx = get_polygon_mask(dust_lane_poly[K.califaID], K.qSignal.shape) & (K.pixelDistance__yx > 3)
-dust_region__yx = get_polygon_mask(dust_region_poly[K.califaID], K.qSignal.shape) & (K.pixelDistance__yx > 3)
+dust_lane__yx = get_polygon_mask(dust_lane_poly[K.califaID], K.qSignal.shape) & (K.pixelDistance__yx > 3) & K.qMask
+dust_region__yx = get_polygon_mask(dust_region_poly[K.califaID], K.qSignal.shape) & (K.pixelDistance__yx > 3) & K.qMask
 
 print 'Finding geometry...'
 for i in xrange(10):
@@ -75,34 +75,50 @@ for i in xrange(10):
 # Plot some diagnostic maps.
 plt.ioff()
 plt.rcParams['legend.fontsize'] = 10
-f = plt.figure(1, figsize=(8,10))
-gs = gridspec.GridSpec(3, 3, width_ratios=[1,1,1], height_ratios=[1,1.5,1.5])
-plt.suptitle('%s (%s) - %s' % (K.califaID, K.galaxyName, qbickId))
+f = plt.figure(1, figsize=(7,7))
+gs = gridspec.GridSpec(2, 2, width_ratios=[1,1], height_ratios=[1,1])
+plt.suptitle('%s (%s) - %s' % (K.califaID, K.galaxyName, args.qbickId))
 
 mask_image = np.zeros_like(K.qSignal)
 mask_image[dust_lane__yx] = 2.0
 mask_image[dust_region__yx] = 3.0
 
-ax_im1 = plt.subplot(gs[0,0])
-ax_im1.imshow(K.qSignal, cmap='jet')
+ax_im0 = plt.subplot(gs[0,0])
+im = ax_im0.imshow(K.qSignal, cmap='jet')
+ax_im0.contour(mask_image, levels=[1.9, 2.9], colors=['gray', 'k'], linewidths=2)
+ax_im0.set_xticks([])
+ax_im0.set_yticks([])
+plt.colorbar(im, ax=ax_im0)
+ax_im0.set_title(r'Image @ $5635 \AA$')
+
+ax_im1 = plt.subplot(gs[0,1])
+im = ax_im1.imshow(K.fluxRatio__yx(4000, 4500, 6100, 6500), cmap='jet')
 ax_im1.contour(mask_image, levels=[1.9, 2.9], colors=['gray', 'k'], linewidths=2)
 ax_im1.set_xticks([])
 ax_im1.set_yticks([])
-ax_im1.set_title('Dust regions')
+plt.colorbar(im, ax=ax_im1)
+ax_im1.set_title(r'Flux ratio ($F_{6300\AA} / F_{4250\AA})$')
 
-ax_im2 = plt.subplot(gs[0,1])
-ax_im2.imshow(K.A_V__yx, cmap='jet')
+ax_im2 = plt.subplot(gs[1,0])
+im = ax_im2.imshow(K.A_V__yx, cmap='jet')
 ax_im2.contour(mask_image, levels=[1.9, 2.9], colors=['gray', 'k'], linewidths=2)
 ax_im2.set_xticks([])
 ax_im2.set_yticks([])
+plt.colorbar(im, ax=ax_im2)
 ax_im2.set_title('$A_V$')
 
-ax_im3 = plt.subplot(gs[0,2])
-ax_im3.imshow(K.at_flux__yx, cmap='jet')
+ax_im3 = plt.subplot(gs[1,1])
+im = ax_im3.imshow(K.at_flux__yx, cmap='jet')
 ax_im3.contour(mask_image, levels=[1.9, 2.9], colors=['gray', 'k'], linewidths=2)
 ax_im3.set_xticks([])
 ax_im3.set_yticks([])
+plt.colorbar(im, ax=ax_im3)
 ax_im3.set_title(r'$\langle \log t \rangle_L$')
+
+gs.tight_layout(f, rect=[0, 0.03, 1, 0.97])
+plt.savefig('maps_%s_%s.png' % (K.califaID, args.qbickId))  
+plt.show()
+
 
 mean_starlight_A_V = K.A_V__yx[dust_region__yx].mean()
 print 'Mean starlight A_V:', mean_starlight_A_V
@@ -145,7 +161,12 @@ clean_int_spec = np.median(f_clean__lyx[..., dust_region__yx], axis=1)
 dusty_int_spec[bad_lambda] = np.ma.masked
 clean_int_spec[bad_lambda] = np.ma.masked
 
-ax_spec = plt.subplot(gs[1,:])
+# Plot the spectra and extinction.
+f = plt.figure(1, figsize=(7,7))
+gs = gridspec.GridSpec(2, 1, width_ratios=[1,], height_ratios=[1,1])
+plt.suptitle('%s (%s) - %s' % (K.califaID, K.galaxyName, args.qbickId))
+
+ax_spec = plt.subplot(gs[0,0])
 ax_spec.plot(K.l_obs, dusty_int_spec, 'r-', label='dust lane')
 ax_spec.plot(K.l_obs, clean_int_spec, 'b-', label='intrinsic')
 ax_spec.set_xticklabels([])
@@ -195,7 +216,7 @@ RV405cal_A__l = fit(_model, K.l_obs[fitmask], A__l[fitmask])
 print RV405cal_A__l
 
 # Plot the extinction curves.
-ax_ext = plt.subplot(gs[2,:])
+ax_ext = plt.subplot(gs[1,0])
 ax_ext.plot(K.l_obs, A__l, 'k-', markeredgecolor='none',
             label=r'Observed')
 ax_ext.plot(K.l_obs, ccm_A__l(K.l_obs), 'b--', markeredgecolor='none',
@@ -214,6 +235,8 @@ ax_ext.set_ylabel(r'$A_\lambda$')
 ax_ext.legend()
 
 gs.tight_layout(f, rect=[0, 0.03, 1, 0.97])  
+plt.savefig('spectra_%s_%s.png' % (K.califaID, args.qbickId))  
+plt.show()
 
 # Plot radial profiles
 distance__yx = np.ma.masked_where(dust_lane__yx | ~K.qMask, K.pixelDistance__yx, copy=True)
@@ -241,16 +264,17 @@ for zz in xrange(n_lane_pix):
         fit_A_V__z[zz] = _cal_A__l.A_V.value
 fit_A_V__yx[dust_lane__yx] = fit_A_V__z
 
-lane_A_V__r = K.radialProfile(lane_A_V__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1)
-fit_A_V__r = K.radialProfile(fit_A_V__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1)
-lane_at_flux__r = K.radialProfile(lane_at_flux__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1)
-lane_Dn4000__r = K.radialProfile(lane_Dn4000__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1)
+rp_mode = 'mean'
+lane_A_V__r = K.radialProfile(lane_A_V__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode=rp_mode)
+fit_A_V__r = K.radialProfile(fit_A_V__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode=rp_mode)
+lane_at_flux__r = K.radialProfile(lane_at_flux__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode=rp_mode)
+lane_Dn4000__r = K.radialProfile(lane_Dn4000__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode=rp_mode)
 
-A_V__r = K.radialProfile(A_V__yx, bin_r=bins, r__yx=distance__yx, rad_scale=1)
-at_flux__r = K.radialProfile(at_flux__yx, bin_r=bins, r__yx=distance__yx, rad_scale=1)
-Dn4000__r = K.radialProfile(Dn4000__yx, bin_r=bins, r__yx=distance__yx, rad_scale=1)
+A_V__r = K.radialProfile(A_V__yx, bin_r=bins, r__yx=distance__yx, rad_scale=1, mode=rp_mode)
+at_flux__r = K.radialProfile(at_flux__yx, bin_r=bins, r__yx=distance__yx, rad_scale=1, mode=rp_mode)
+Dn4000__r = K.radialProfile(Dn4000__yx, bin_r=bins, r__yx=distance__yx, rad_scale=1, mode=rp_mode)
 
-f = plt.figure(1, figsize=(8,10))
+f = plt.figure(2, figsize=(8,10))
 gs = gridspec.GridSpec(3, 1, width_ratios=[1,], height_ratios=[1,1,1])
 plt.suptitle('%s (%s) - %s' % (K.califaID, K.galaxyName, args.qbickId))
 
@@ -275,4 +299,5 @@ ax_Dn.set_xlabel(r'radius [arcsec]')
 ax_Dn.set_ylabel(r'$D_n(4000)$')
 
 gs.tight_layout(f, rect=[0, 0.03, 1, 0.97])  
+plt.savefig('radprof_%s_%s.png' % (K.califaID, args.qbickId))  
 plt.show()
