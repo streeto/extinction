@@ -12,8 +12,15 @@ class PolyGrabber:
         self.line = Line2D([],[], lw=2.0, color='k', figure=self.fig)
         self.axes = self.fig.axes[0]
         self.axes.add_line(self.line)
+        self.curImage = self.axes.images[0]
+        self.raiseImage('1')
+        self.redraw()
+        
 
-    
+    def redraw(self):
+        self.fig.canvas.draw()
+        
+        
     def connect(self):
         self.fig.canvas.mpl_connect('button_press_event', self.onButtonPress)
         self.fig.canvas.mpl_connect('key_press_event', self.onKeyPress)
@@ -26,15 +33,31 @@ class PolyGrabber:
             self.delLastPoint()
         else:
             return
-        self.fig.canvas.draw()
+        self.redraw()
 
 
     def onKeyPress(self, ev):
         if ev.key in ['1', '2', '3', '4', '5']:
             self.raiseImage(ev.key)
+        elif ev.key == 'z':
+            self.changeCLim(dmin=-0.05)
+        elif ev.key == 'x':
+            self.changeCLim(dmin=0.05)
+        elif ev.key == 'c':
+            self.changeCLim(dmax=-0.05)
+        elif ev.key == 'v':
+            self.changeCLim(dmax=0.05)
         elif ev.key == 'enter':
             self.dumpPoly()
-        self.fig.canvas.draw()
+        self.redraw()
+
+    
+    def changeCLim(self, dmin=0.0, dmax=0.0):
+        vmin, vmax = self.curImage.get_clim()
+        rng = vmax - vmin
+        vmin += rng * dmin
+        vmax += rng * dmax
+        self.curImage.set_clim(vmin, vmax)
 
 
     def raiseImage(self, key):
@@ -43,10 +66,13 @@ class PolyGrabber:
         except:
             pass
         for i in xrange(len(self.axes.images)):
+            im = self.axes.images[i]
             if i == ev_id:
-                self.axes.images[i].set_alpha(1.0)
+                im.set_alpha(1.0)
+                self.curImage = im
+                self.axes.set_title(im.get_label())
             else:
-                self.axes.images[i].set_alpha(0.0)
+                im.set_alpha(0.0)
 
 
     def addPoint(self, x, y):
@@ -87,12 +113,22 @@ K = fitsQ3DataCube(args.db[0])
 plt.ioff()
 f = plt.figure(1, figsize=(7,7))
 ax = f.add_subplot(111)
-ax.imshow(K.qSignal, cmap='jet')
-ax.imshow(K.A_V__yx, cmap='jet')
-im = ax.imshow(K.fluxRatio__yx(4000, 4500, 6100, 6500), cmap='jet')
-ax.set_title(r'Image @ $5635 \AA$')
+ax.imshow(K.qSignal, cmap='jet', label=r'Image @ $5635 \AA$')
+ax.imshow(K.A_V__yx, cmap='jet', label=r'$A_V$')
+im = ax.imshow(K.fluxRatio__yx(4000, 4500, 6100, 6500), cmap='jet',
+               label=r'Flux ratio ($F_{6300\AA} / F_{4250\AA})$')
+ax.set_title(im.get_label())
 
 grabber = PolyGrabber(f)
 grabber.connect()
 
+print '''Use the keys 1-5 to cycle between the images.
+Left click adds a vertex in the current mouse position.
+Right click deletes the last point.
+
+Press <enter> when done, it will print the polygon as a python list.
+
+
+
+'''
 plt.show()
