@@ -1,0 +1,458 @@
+\documentclass[a4paper]{article}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+\usepackage{xspace}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{aas_macros}
+\bibliographystyle{apj}
+\citestyle{aa}
+
+\newcommand{\angstrom}{\text{\AA}}
+\def\starlight{\textsc{starlight}\xspace}
+\def\qbick{\texttt{qbick}\xspace}
+\def\gsd{\texttt{gsd61}\xspace}
+\def\CCM{\textit{CCM}\xspace}
+\def\CAL{\textit{CAL}\xspace}
+
+\author{André Luiz de Amorim, Natalia Vale Asari, Roberto Cid Fernandes}
+\date{\today}
+\title{Report on dust lane studies}
+
+\begin{document}
+\maketitle
+
+As you may or may not know, we are trying to measure the extinction law of dust
+lanes in front of some CALIFA galaxies. We developed a method to estimate the
+intrinsic spectra, behind the dust lane, and then compute directly $A_\lambda$
+for each pixel comparing them to the observed ``dusty'' spectra. So far we have
+applied the method to K0708 (Figure \ref{fig:sdssK0708}) and K0925 (Figure
+\ref{fig:sdssK0925}), using the cubes from pipeline 1.3c (processed by \qbick
+0.3.6) with no binning, that is, using all the pixels. We also use cubes from
+pipelines 1.3c and 1.4 (processed by \qbick 0.4.2), using Voronoi binning for
+$S/N \geq 20$. All the spectra were \starlight-ed using the base Granada (\gsd).
+We were inspired by the work done by \citet{Holwerda2013}, who use HST and
+CALIFA data. Also worth mentioning is the paper by \citet{Wild2011}, which uses
+photometry and pairs of galaxies.
+
+These are our preliminary results.
+
+
+\section{Selecting the dust lane}
+
+The first issue we should address is, how to decide which pixels belong to the
+dust lane, and which ones do not? Our first try was to select pixels where the
+$A_V$ from \starlight is over a given threshold. This seems a circular argument,
+but we had to start somewhere. The problem here lies in the
+age--metallicity--dust degeneracy, so that pixels with high $A_V$ may be false
+positives (or conversely, low $A_V$ false negatives). It also depends on the
+particular \starlight run, so we end up having the dust lane defined as
+different regions in the various cubes from the same galaxy. This can be
+misleading, we need a stronger definition of the dust lane region.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=0.6\columnwidth]{figures/K0708.png}
+\end{center}
+
+\caption{K0708 (NGC 5485), image from SDSS.}
+\label{fig:sdssK0708}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=0.6\columnwidth]{figures/K0925.png}
+\end{center}
+
+\caption{K0925 (NGC 7722), image from SDSS.}
+\label{fig:sdssK0925}
+\end{figure}
+
+We developed a small software that plots maps of some properties, and allows one
+to freely draw polygons over it. Only one map is shown at a time, and the
+current map can be selected using the keyboard. The z--scale (\texttt{vmin} and
+\texttt{vmax}) can also be changed using the keyboard. Using this tool, the dust
+lanes were selected based on the map of flux ratio $F_{6300\,\angstrom} /
+F_{4250\,\angstrom}$, which roughly defines a color.
+The $A_V$ map was also used in this step as hint, but when there were
+discrepancies between color and $A_V$, the color prevailed. These maps are
+presented in Figures \ref{fig:mapsK0708} and \ref{fig:mapsK0925}.
+
+\begin{figure}
+\includegraphics{figures/maps_K0708_1.3c_v01.pdf}
+
+\caption{Some maps for K0708, using the pipeline 1.3c, and no Voronoi binning.
+Overlaid on the maps are the contours of the dust regions. In gray, the masked
+region, reconstructed using the technique described in section
+\ref{sec:filling}. In black, the region used in the Figures
+\ref{fig:extinctionK0708} and \ref{fig:extinctionK0925} (see section \ref{}.
+{\em Top left}:
+logarithm of flux at $5590$--$5680\,\angstrom$.
+{\em Top right}: flux ratio between $6100$--$6500\,\angstrom$ and
+$4000$--$4500\,\angstrom$. {\em Bottom left}: extinction $A_V$ fitted by
+\starlight. {\em Bottom right}: mean of the logarithm of stellar age, weighted
+by flux.}
+
+\label{fig:mapsK0708}
+\end{figure}
+
+\begin{figure}
+\includegraphics{figures/maps_K0925_1.3c_v01.pdf}
+
+\caption{The same as Figure \ref{fig:mapsK0708}, for K0925, pipeline 1.3c, and
+no Voronoi binning.}
+\label{fig:mapsK0925}
+\end{figure}
+
+
+\section{Estimating the intrinsic spectra}
+
+Now you are probably thinking, ``how can they expect to know what's really
+behind the dust?''. Well, we had to make some assumptions. First, the galaxies
+are elliptical. Exploiting the symmetry of the galaxy, we can try to fill in the
+flux on the missing spaxels. Of course, we have to know the geometry of the
+galaxy.
+
+\subsection{Finding the geometry}
+\label{sec:geometry}
+
+If the galaxies are truly elliptical, we can expect to describe them reasonably
+well by a ellipse projection with a given $P.A.$ and $b/a$. These parameters
+were determined using the flux at $5590$--$5680\,\angstrom$. The algorithm is
+the following:
+
+\begin{enumerate}
+  \item Assume initially that $b/a = 1.0, P.A. = 0.0$.
+  \item Mask the pixels belonging to the dust lane (gray area in Figures
+  \ref{fig:mapsK0708} and \ref{fig:mapsK0925}).
+  \item \label{itm:radprof} Calculate the radial profile.
+  \item Fill the masked pixels using the radial profile value at the pixel distances.
+  \item Calculate P.A. and $b/a$\footnote{We estimate ellipticity and
+  orientation of the galaxy using the ``Stokes parameters'', as described by
+  Stoughton et al. (2002). See \url{http://adsabs.harvard.edu/abs/2002AJ....123..485S}}.
+  \item Go to item \ref{itm:radprof} until $b/a$ and $P.A.$ converge.
+\end{enumerate}
+
+This approach is very simplistic but we believe is enough to provide a good
+estimate of the true geometry of the galaxy. We then assume this geometry is the
+same at all wavelengths, in the following steps.
+
+\subsection{Kinematics effects}
+
+In the next section we will be taking slices with constant wavelength of the
+galaxy 3-D spectra. We compensate the peculiar velocities of each spaxel ($v_0$)
+using values previously fitted using \starlight. We also address the velocity
+dispersion ($v_d$, also fitted using \starlight) by convolving each spectrum
+with a gaussian velocity distribution, such that the final $v_d$ is greater or
+equal to a target value, $v_{d,\text{target}}$. The gaussian used in the
+convolution has a variance of $v_{d,\text{conv}}$, and is calculated for each
+spaxel as \[ v_{d,\text{conv}} = \sqrt{v^2_{d,\text{target}} - v^2_d} \] We
+leave the spectra unchanged if $v_d \geq v_{d,\text{target}}$. In this report we
+used $v_{d,\text{target}} = 300\,km/s$, a value taken from the hat.
+
+\subsection{Filling the missing spaxels}
+\label{sec:filling}
+
+Now we can take slices of the 3-D spectra with constant wavelength, treating
+each slice as an image. We then apply the same technique used in Section
+\ref{sec:geometry}, that is, for each wavelength, take a slice, mask the dust
+lane (the gray area), calculate the radial profile of the flux, and fill the
+missing pixels with the the value of the radial profile in its radius. This way,
+we have the observed spectra of the pixels on the dust lane, in addition to the
+original spectra. By comparing these two spectra, spaxel by spaxel, we can
+obtain the map of the extinction.
+
+
+\section{Calculating and fitting the extinction}
+
+Considering the dust is in front of the galaxy, the optical depth can be
+calculated as
+\begin{equation}
+\tau_\lambda = \ln \frac{F^\text{obs}_\lambda}{F^\text{intr}_\lambda}.
+\end{equation}
+This relates to the extinction by the following:
+\begin{equation}
+A_\lambda = \frac{\log e}{0.4} \tau_\lambda \approx 1.086 \tau_\lambda
+\end{equation}
+As a first test, we select a region which seems redder and ``dustier'', marked in
+black in Figures \ref{fig:mapsK0708} and \ref {fig:mapsK0925}. We calculate the
+integrated observed and intrinsic spectra and compute $A_\lambda$ for this
+region. The integrated spectra are shown in the upper panels of the Figures
+\ref{fig:extinctionK0708} and \ref{fig:extinctionK0925}, $A_\lambda$ is shown
+in the lower panels, along with the fits described below.
+
+Inspecting $A_\lambda$, a ``hump'' in the blue part becomes evident for both
+galaxies. This is the biggest question of this report, to which we will go back
+later.
+
+\begin{figure}
+\includegraphics{figures/spectra_K0708_1.3c_v01.pdf}
+
+\caption{Spectra and extinction of the selected ``dusty'' region in galaxy
+K0708, using pipeline 1.3c, and no Voronoi binning. {\em Top}: integrated
+intrinsic (blue) and observed (red) spectra.
+{\em Bottom}: the measured extinction $A_\lambda$ (black solid line), and
+various reddening law fits: \CCM with free $R_V$ (blue solid line) and fixed
+$R_V = 3.1$ (blue dotted line); \CAL with free $R_V$ (red solid line) and fixed
+$R_V = 4.05$ (red dotted line).}
+\label{fig:extinctionK0708}
+\end{figure}
+
+\begin{figure}
+\includegraphics{figures/spectra_K0925_1.3c_v01.pdf}
+\caption{The same as Figure \ref{fig:extinctionK0708}, for K0925, pipeline 1.3c, and
+no Voronoi binning.}
+\label{fig:extinctionK0925}
+\end{figure}
+
+Now, we fit a \citet*[hereafter \CCM, blue in the $A_\lambda$ plots]{CCM1989},
+and \citet[hereafter \CAL, red in the $A_\lambda$ plots]{Calzetti1994}
+extinction laws to the integrated spectra (lower panels of the Figures
+\ref{fig:extinctionK0708} and \ref{fig:extinctionK0925}). The fits are performed
+only taking $\lambda > 4000\,\angstrom$ into account to avoid the weird
+behaviour in the blue part, and leaving $R_V$ as either a free parameter or
+fixed at $R_V = 3.1$ for \CCM and $R_V = 4.05$ for \CAL. We can see clearly that
+for K0708, the ``canonical'' values for $R_V$ fit the data very poorly for both
+of the models. The reddening is steeper, requiring lower values of $R_V$.
+Leaving $R_V$ free in this galaxy we obtain a good fit for both models, perhaps
+a slightly better result using \CAL. For K0925, the fits are fairly good
+regardless of model or fixing/freeing $R_V$. The parameters obtained are
+presented in Table \ref{tab:params}.
+
+\begin{table}
+\caption{Fit parameters for \CCM and \CAL reddening laws. The $\star$ symbol
+denotes values kept fixed in the fitting process.}
+\label{tab:params}
+\begin{center}
+\begin{tabular}{l | r r | r r}
+\hline
+       & \multicolumn{2}{c}{\CCM} & \multicolumn{2}{c}{\CAL} \\
+\hline
+Galaxy & $R_V$        & $A_V$           & $R_V$        & $A_V$  \\
+\hline
+K0708  & $1.16$       & $0.13$          & $1.44$       & $0.14$ \\
+       & $3.10^\star$ & $0.15$          & $4.05^\star$ & $0.15$ \\
+K0925  & $3.91$       & $1.01$          & $3.95$       & $1.01$ \\
+       & $3.10^\star$ & $0.98$          & $4.05^\star$ & $1.01$ \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+Next, we compute $A_\lambda$ for each of the spaxels inside the dust lane
+(again, the gray region in the maps), and fit a \CCM reddening with $R_V = 3.1$.
+The objective is to compare the values of $A_V$ obtained using this method to
+the ones given by \starlight, so we must use the same setup. To better compare
+the two results, we plot radial profiles of $A_V$ (Figures
+\ref{fig:radprofK0708} and \ref{fig:radprofK0925}, top left panels). The radial
+profiles were calculated as an average of the $A_V$ in pixels inside a given
+radial ring, which may raise some eyebrows. In our defense, radial profiles are
+easier to visualize and compare than maps; as this is just a first look into the
+subject, we apologize for the lack of rigor.
+
+In the same Figures we present the average stellar age (top right), $D_n(4000)$
+(bottom left), and the flux ratio used in the selection of the dust lane (bottom
+right). These were plotted to help assert whether treating the dust lane as a
+dust curtain is a valid hypothesis\footnote{Other spectral indices could
+(should?) also be used.}. If the dust lane should contain any embedded or
+foreground stellar populations, the radial profiles for mean stellar age and
+$D_n(4000)$ in the dust region and in the rest of the galaxy would not match. On
+the other hand, if the dust lane really consists of a dust curtain, these
+properties should be the same in those two regions. The latter is true for $r <
+15"$ in the case of K0708 and for $10" < r < 20"$ in the case of K0925. Outside
+these regions the mean stellar age and $D_n(4000)$ look quite different. This is
+probably caused by wrongly selected regions, including, for instance,
+contamination near the masked circle in K0925. Still in K0925, even in the
+``good'' section there's a slight decrease ($\sim 0.2\,dex$) in stellar age, and
+some variations in $D_n(4000)$.
+
+%TODO: is the decrease enough to discard K0925?
+
+\begin{figure}
+\includegraphics{figures/radprof_K0708_1.3c_v01.pdf}
+
+\caption{Radial profiles for galaxy K0708, pipeline 1.3c and no binning. The
+solid lines are for the dust region, and the dashed black lines are for the rest
+of the galaxy. {\em Top left}: mean $A_V$ obtained by \starlight. In this panel
+the dotted points are the $A_V$ obtained by our fitting in the dust region. The
+difference between the \starlight and fitted values in the dust region (dashed
+red lines) should be equal to the rest of the galaxy (dashed black lines) if
+our model is correct. {\em Top right}: mean of the logarithm of stellar age,
+weighted by flux. If our model is correct, these should be the same. {\em Bottom
+left}: $D_n(4000)$. Again, if our model is correct, these should also be the
+same. {\em Bottom right}: flux ratio between $6100$--$6500\,\angstrom$ and
+$4000$--$4500\,\angstrom$. This is the main criterion used in the selection of
+the dust lane pixels.}
+\label{fig:radprofK0708}
+\end{figure}
+
+\begin{figure}
+\includegraphics{figures/radprof_K0925_1.3c_v01.pdf}
+
+\caption{Same as Figure \ref{fig:radprofK0708} for K0925, pipeline 1.3c, no
+binning.}
+\label{fig:radprofK0925}
+\end{figure}
+
+Now let's examine the $A_V$ radial profiles. The black solid lines are the $A_V$
+obtained by \starlight, inside the dust lane. If there were no dust lane, the
+radial profile of $A_V$ of the galaxy should be the one plotted as dashed black
+lines, calculated by masking away the dust lane. The $A_V$ fitted by our model
+are plotted as dotted black lines. One would be tempted to compare the values
+from \starlight to the ones we fitted, but there's a catch. We measure the
+extinction from the dust lane alone, while \starlight measures the extinction of
+the dust lane plus the extinction in the underlying galaxy. So, the real
+comparison should involve the {\em difference} between \starlight and our model
+(plotted as dashed red lines), and the extinction in the underlying galaxy.
+Graphically, the red and black lines should coincide. This is certainly not true
+for K0708 (top left of Figure \ref{fig:radprofK0708}). Remembering that here we
+fit a \CCM law with $R_V = 3.1$, and that K0708 could not be fitted well by this
+model, this mismatch is understandable, if not expected. For K0925, fitted
+nicely by that law, the red and black lines almost coincide in the $10" < r <
+20"$ region. Above this region, there's a weird behaviour in stellar age,
+$D_n(4000)$ and $A_V$, probably due to a bad selection of the dust lane, so one
+should not expect the lines to match anyway.
+
+
+\section{Summary and current issues}
+
+The analysis above was performed on datacubes from pipeline 1.3c. We also have
+the same plots for pipeline 1.3c (Appendix \ref{sec:app13c}, Figures
+\ref{fig:maps_K0708_13c_v20} to \ref{fig:radprof_K0925_13c_v20}) and 1.4
+(Appendix \ref{sec:app14}, Figures \ref{fig:maps_K0708_14_v20} to
+\ref{fig:radprof_K0925_14_v20}) where we applied a Voronoi binning to achieve
+$S/N > 20$. The results are practically the same with those data, which at least
+implies that the ``hump'' in the blue end of $A_\lambda$ is not a calibration
+issue.
+
+To summarize the findings, questions and possible paths:
+
+\begin{itemize} 
+
+\item We find a ``hump'' in the blue end ($< 4000\,\angstrom$) of the extinction
+curve. We are not sure of its origin, or even if it is real or an artifact of
+our analysis.
+
+\item We need a more objective way of selecting the dust lane regions. Use Lick
+indices?
+
+\item These objects may be in interaction, so the assumption of well--behaved
+elliptical shape may not apply.
+
+\item We chose $v_{d,\text{target}} = 300\,km/s$ arbitrarily. How to properly
+take the velocity dispersion into account?
+
+\item Is the dust lane really a dust curtain? Does it contain any embedded
+stellar populations? This could change drastically the extinction curve.
+
+\item We can feed the intrinsic estimated spectra to \starlight and compare
+pixel-wise the stellar populations to the ones obtained using the observed dusty spectra.
+Except for $A_V$, all the results obtained should be similar.
+
+\item There's the Sodium absorption feature, visible in the lower panel of
+Figure \ref{fig:extinctionK0708}. We should try to look at it in higher resolution,
+avoiding the velocity convolutions.
+
+\item We should try alternate strategies to determine the intrinsic spectra. For
+example, we could fit a lambda-dependant Sérsic profile\footnote{See the
+presentation from 6th Busy Week:
+\url{ftp://mycalifa:myafi07lAc@ftp.caha.es/documents/6BW/ALdeAmorim_6BW_StellarSynthesis_MorphDecomposition.pdf}.
+Also, my qualification exam on morphological decomposition of spectra (in
+Portuguese):
+\url{http://minerva.ufsc.br/~andre/qualify_2013.pdf}.} after masking away the
+dust lane spaxels.
+
+\end{itemize}
+
+
+\bibliography{references}
+
+
+\appendix
+
+\section{Appendix: plots using pipeline 1.3c, Voronoi binning for $S/N > 20$}
+\label{sec:app13c}
+
+\begin{figure}[H]
+\includegraphics{figures/maps_K0708_1.3c_v20.pdf}
+\caption{Maps for K0708, pipeline 1.3c, Voronoi binning for $S/N > 20$. See
+Figure \ref{fig:mapsK0708} for details.}
+\label{fig:maps_K0708_13c_v20}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics{figures/spectra_K0708_1.3c_v20.pdf}
+\caption{Spectra and extinction for K0708, pipeline 1.3c, Voronoi binning for
+$S/N > 20$. See Figure \ref{fig:extinctionK0708} for details.}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics{figures/radprof_K0708_1.3c_v20.pdf}
+\caption{Radial profiles for K0708, pipeline 1.3c, Voronoi binning for $S/N >
+20$. See Figure \ref{fig:radprofK0708} for details.}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics{figures/maps_K0925_1.3c_v20.pdf}
+\caption{Maps for K0925, pipeline 1.3c, Voronoi binning for $S/N > 20$. See
+Figure \ref{fig:mapsK0708} for details.}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics{figures/spectra_K0925_1.3c_v20.pdf}
+\caption{Spectra and extinction for K0925, pipeline 1.3c, Voronoi binning for
+$S/N > 20$. See Figure \ref{fig:extinctionK0708} for details.}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics{figures/radprof_K0925_1.3c_v20.pdf}
+\caption{Radial profiles for K0925, pipeline 1.3c, Voronoi binning for $S/N >
+20$. See Figure \ref{fig:radprofK0708} for details.}
+\label{fig:radprof_K0925_13c_v20}
+\end{figure}
+
+\section{Appendix: plots using pipeline 1.4, Voronoi binning for $S/N > 20$}
+\label{sec:app14}
+
+\begin{figure}[H]
+\includegraphics{figures/maps_K0708_1.4_v20.pdf}
+\caption{Maps for K0708, pipeline 1.4, Voronoi binning for $S/N > 20$. See
+Figure \ref{fig:mapsK0708} for details.}
+\label{fig:maps_K0708_14_v20}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics{figures/spectra_K0708_1.4_v20.pdf}
+\caption{Spectra and extinction for K0708, pipeline 1.4, Voronoi binning for
+$S/N > 20$. See Figure \ref{fig:extinctionK0708} for details.}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics{figures/radprof_K0708_1.4_v20.pdf}
+\caption{Radial profiles for K0708, pipeline 1.4, Voronoi binning for $S/N >
+20$. See Figure \ref{fig:radprofK0708} for details.}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics{figures/maps_K0925_1.4_v20.pdf}
+\caption{Maps for K0925, pipeline 1.4, Voronoi binning for $S/N > 20$. See
+Figure \ref{fig:mapsK0708} for details.}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics{figures/spectra_K0925_1.4_v20.pdf}
+\caption{Spectra and extinction for K0925, pipeline 1.4, Voronoi binning for
+$S/N > 20$. See Figure \ref{fig:extinctionK0708} for details.}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics{figures/radprof_K0925_1.4_v20.pdf}
+\caption{Radial profiles for K0925, pipeline 1.4, Voronoi binning for $S/N >
+20$. See Figure \ref{fig:radprofK0708} for details.}
+\label{fig:radprof_K0925_14_v20}
+\end{figure}
+
+\end{document}
