@@ -114,8 +114,8 @@ plt.ioff()
 f = plt.figure(1, figsize=(7,7))
 ax = f.add_subplot(111)
 ax.imshow(K.qSignal, cmap='jet', label=r'Image @ $5635 \AA$')
-ax.imshow(K.A_V__yx, cmap='jet', label=r'$A_V$')
-im = ax.imshow(K.fluxRatio__yx(4000, 4500, 6100, 6500), cmap='jet',
+ax.imshow(K.A_V__yx, cmap='jet', vmin=0.0, vmax=2.0, label=r'$A_V$')
+im = ax.imshow(K.fluxRatio__yx(4000, 4500, 6100, 6500), vmin=0.5, vmax=1.0, cmap='jet',
                label=r'Flux ratio ($F_{6300\AA} / F_{4250\AA})$')
 ax.set_title(im.get_label())
 
