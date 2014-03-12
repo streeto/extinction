@@ -16,6 +16,8 @@ parser.add_argument('--vd', dest='targetVd', default=0.0, type=float,
                     help='Velocity dispersion to be convolved with the spectra (if --fixk).')
 parser.add_argument('--lll', dest='lambdaLowerLimit', default=0.0, type=float,
                     help='Lower limit in lambda when fitting.')
+parser.add_argument('--outdir', dest='outdir', default='.', type=str,
+                    help='Output directory for figures.')
 
 args = parser.parse_args()
 
@@ -141,7 +143,7 @@ plt.colorbar(im, ax=ax_im3)
 ax_im3.set_title(r'$\langle \log t \rangle_L$')
 
 gs.tight_layout(f, rect=[0, 0, 1, 0.97])
-plt.savefig('maps_%s_%s_v%02d.pdf' % (calId, pipeVer, sn_vor))  
+plt.savefig('%s/maps_%s_%s_v%02d.pdf' % (args.outdir, calId, pipeVer, sn_vor))  
 # plt.show()
 
 
@@ -261,7 +263,7 @@ ax_ext.set_ylabel(r'$A_\lambda$')
 ax_ext.legend(loc='lower left')
 
 gs.tight_layout(f, rect=[0, -0.04, 1, 0.99])  
-plt.savefig('spectra_%s_%s_v%02d.pdf' % (calId, pipeVer, sn_vor))  
+plt.savefig('%s/spectra_%s_%s_v%02d.pdf' % (args.outdir, calId, pipeVer, sn_vor))  
 # plt.show()
 
 # Plot radial profiles
@@ -352,5 +354,5 @@ ax_cl.set_ylabel(r'Flux ratio $(6300 / 4250)$')
 ax_cl.set_xlim(0, bins.max())
 
 gs.tight_layout(f, rect=[0, -0.04, 1, 0.99])  
-plt.savefig('radprof_%s_%s_v%02d.pdf' % (calId, pipeVer, sn_vor))
+plt.savefig('%s/radprof_%s_%s_v%02d.pdf' % (args.outdir, calId, pipeVer, sn_vor))
 # plt.show()
