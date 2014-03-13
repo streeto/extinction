@@ -25,30 +25,33 @@
 \begin{document}
 \maketitle
 
-As you may or may not know, we are trying to measure the extinction law of dust
-lanes in front of some CALIFA galaxies. We developed a method to estimate the
-intrinsic spectra, behind the dust lane, and then compute directly $A_\lambda$
-for each pixel comparing them to the observed ``dusty'' spectra. So far we have
-applied the method to K0708 (Figure \ref{fig:sdssK0708}) and K0925 (Figure
-\ref{fig:sdssK0925}), using the cubes from pipeline 1.3c (processed by \qbick
-0.3.6) with no binning, that is, using all the pixels. We also use cubes from
-pipelines 1.3c and 1.4 (processed by \qbick 0.4.2), using Voronoi binning for
-$S/N \geq 20$. All the spectra were \starlight-ed using the base Granada (\gsd).
-We were inspired by the work done by \citet{Holwerda2013}, who use HST and
-CALIFA data. Also worth mentioning is the paper by \citet{Wild2011}, which uses
-photometry and pairs of galaxies.
+As you may or may not know, we are trying to measure the extinction
+law of dust lanes in front of some CALIFA galaxies. We developed a
+method to estimate the intrinsic spectra, behind the dust lane, and
+then compute directly $A_\lambda$ for each pixel comparing them to the
+observed ``dusty'' spectra. So far we have applied the method to K0708
+(Figure \ref{fig:sdssK0708}) and K0925 (Figure \ref{fig:sdssK0925}),
+using the cubes from pipeline 1.3c (processed by \qbick 0.3.6) with no
+binning, that is, analysing all the spaxel by spaxel. We also use
+cubes from pipelines 1.3c and 1.4 (processed by \qbick 0.4.2), using
+Voronoi binning for $S/N \geq 20$. All the spectra were \starlight-ed
+using the base Granada (\gsd [*** explain: Vazdekis MILES till age bla
+bla + Granada theoretical models]).  We were inspired by the work done by
+\citet{Holwerda2013}, who use HST and CALIFA data. Also worth
+mentioning is the paper by \citet{Wild2011}, which uses photometry and
+pairs of SDSS galaxies.
 
 These are our preliminary results.
 
 
 \section{Selecting the dust lane}
 
-The first issue we should address is, how to decide which pixels belong to the
-dust lane, and which ones do not? Our first try was to select pixels where the
+The first issue we should address is how to decide which pixels belong to the
+dust lane, and which ones do not. Our first try was to select pixels where the
 $A_V$ from \starlight is over a given threshold. This seems a circular argument,
 but we had to start somewhere. The problem here lies in the
 age--metallicity--dust degeneracy, so that pixels with high $A_V$ may be false
-positives (or conversely, low $A_V$ false negatives). It also depends on the
+positives (or, conversely, low $A_V$ false negatives). It also depends on the
 particular \starlight run, so we end up having the dust lane defined as
 different regions in the various cubes from the same galaxy. This can be
 misleading, we need a stronger definition of the dust lane region.
@@ -77,7 +80,7 @@ current map can be selected using the keyboard. The z--scale (\texttt{vmin} and
 \texttt{vmax}) can also be changed using the keyboard. Using this tool, the dust
 lanes were selected based on the map of flux ratio $F_{6300\,\angstrom} /
 F_{4250\,\angstrom}$, which roughly defines a color.
-The $A_V$ map was also used in this step as hint, but when there were
+The $A_V$ map was also used in this step as a hint. When there were
 discrepancies between color and $A_V$, the color prevailed. These maps are
 presented in Figures \ref{fig:mapsK0708} and \ref{fig:mapsK0925}.
 
@@ -88,7 +91,8 @@ presented in Figures \ref{fig:mapsK0708} and \ref{fig:mapsK0925}.
 Overlaid on the maps are the contours of the dust regions. In gray, the masked
 region, reconstructed using the technique described in section
 \ref{sec:filling}. In black, the region used in the Figures
-\ref{fig:extinctionK0708} and \ref{fig:extinctionK0925} (see section \ref{}.
+\ref{fig:extinctionK0708} and \ref{fig:extinctionK0925} (see section
+\ref{}[*** to fix].
 {\em Top left}:
 logarithm of flux at $5590$--$5680\,\angstrom$.
 {\em Top right}: flux ratio between $6100$--$6500\,\angstrom$ and
@@ -110,11 +114,11 @@ no Voronoi binning.}
 
 \section{Estimating the intrinsic spectra}
 
-Now you are probably thinking, ``how can they expect to know what's really
-behind the dust?''. Well, we had to make some assumptions. First, the galaxies
-are elliptical. Exploiting the symmetry of the galaxy, we can try to fill in the
-flux on the missing spaxels. Of course, we have to know the geometry of the
-galaxy.
+Now you are probably thinking, ``how can they expect to know what's
+really behind the dust?''. Well, we had to make some
+assumptions. First, we have chosen elliptical galaxies. Exploiting the
+symmetry of the galaxy, we can try to fill in the flux on the missing
+spaxels. Of course, we have to know the geometry of the galaxy.
 
 \subsection{Finding the geometry}
 \label{sec:geometry}
@@ -208,19 +212,21 @@ no Voronoi binning.}
 \label{fig:extinctionK0925}
 \end{figure}
 
-Now, we fit a \citet*[hereafter \CCM, blue in the $A_\lambda$ plots]{CCM1989},
-and \citet[hereafter \CAL, red in the $A_\lambda$ plots]{Calzetti1994}
-extinction laws to the integrated spectra (lower panels of the Figures
-\ref{fig:extinctionK0708} and \ref{fig:extinctionK0925}). The fits are performed
-only taking $\lambda > 4000\,\angstrom$ into account to avoid the weird
-behaviour in the blue part, and leaving $R_V$ as either a free parameter or
-fixed at $R_V = 3.1$ for \CCM and $R_V = 4.05$ for \CAL. We can see clearly that
-for K0708, the ``canonical'' values for $R_V$ fit the data very poorly for both
-of the models. The reddening is steeper, requiring lower values of $R_V$.
-Leaving $R_V$ free in this galaxy we obtain a good fit for both models, perhaps
-a slightly better result using \CAL. For K0925, the fits are fairly good
-regardless of model or fixing/freeing $R_V$. The parameters obtained are
-presented in Table \ref{tab:params}.
+Now, we fit a \citet*[hereafter \CCM, blue in the $A_\lambda$
+plots]{CCM1989}, and a \citet*[hereafter \CAL, red in the $A_\lambda$
+plots]{Calzetti1994} extinction laws to the integrated spectra (lower
+panels of the Figures \ref{fig:extinctionK0708} and
+\ref{fig:extinctionK0925}). The fits are performed taking only
+$\lambda > 4000\,\angstrom$ into account to avoid the weird behaviour
+in the blue part, and leaving $R_V$ as either a free parameter or
+fixed at $R_V = 3.1$ for \CCM and $R_V = 4.05$ for \CAL. We can
+clearly see that for K0708 the ``canonical'' values for $R_V$ fit the
+data very poorly for both of laws. The reddening is steeper,
+requiring lower values of $R_V$.  Leaving $R_V$ free in this galaxy we
+obtain a good fit for both models, perhaps a slightly better result
+using \CAL. For K0925, the fits are fairly good regardless of model or
+fixing/freeing $R_V$. The parameters obtained are presented in Table
+\ref{tab:params}.
 
 \begin{table}
 \caption{Fit parameters for \CCM and \CAL reddening laws. The $\star$ symbol
@@ -255,12 +261,17 @@ subject, we apologize for the lack of rigor.
 
 In the same Figures we present the average stellar age (top right), $D_n(4000)$
 (bottom left), and the flux ratio used in the selection of the dust lane (bottom
-right). These were plotted to help assert whether treating the dust lane as a
-dust curtain is a valid hypothesis\footnote{Other spectral indices could
+right). [*** I don't think this tests if the dust screen hypothesis is
+valid. We are testing if a dust screen model with the same intrinsic
+SSPs might be valid, but both things are being tested together and,
+given the degeneracies in age--attenuation, even if we find this model
+is a good fit this does not mean the real world is like this.]
+These were plotted to help assert whether treating the dust lane as a
+dust screen is a valid hypothesis\footnote{Other spectral indices could
 (should?) also be used.}. If the dust lane should contain any embedded or
 foreground stellar populations, the radial profiles for mean stellar age and
 $D_n(4000)$ in the dust region and in the rest of the galaxy would not match. On
-the other hand, if the dust lane really consists of a dust curtain, these
+the other hand, if the dust lane really consists of a dust screen, these
 properties should be the same in those two regions. The latter is true for $r <
 15"$ in the case of K0708 and for $10" < r < 20"$ in the case of K0925. Outside
 these regions the mean stellar age and $D_n(4000)$ look quite different. This is
@@ -298,7 +309,7 @@ binning.}
 \end{figure}
 
 Now let's examine the $A_V$ radial profiles. The black solid lines are the $A_V$
-obtained by \starlight, inside the dust lane. If there were no dust lane, the
+obtained by \starlight inside the dust lane. If there was no dust lane, the
 radial profile of $A_V$ of the galaxy should be the one plotted as dashed black
 lines, calculated by masking away the dust lane. The $A_V$ fitted by our model
 are plotted as dotted black lines. One would be tempted to compare the values
@@ -309,7 +320,7 @@ comparison should involve the {\em difference} between \starlight and our model
 (plotted as dashed red lines), and the extinction in the underlying galaxy.
 Graphically, the red and black lines should coincide. This is certainly not true
 for K0708 (top left of Figure \ref{fig:radprofK0708}). Remembering that here we
-fit a \CCM law with $R_V = 3.1$, and that K0708 could not be fitted well by this
+report \starlight fits using a \CCM law with $R_V = 3.1$, and that K0708 could not be fitted well by this
 model, this mismatch is understandable, if not expected. For K0925, fitted
 nicely by that law, the red and black lines almost coincide in the $10" < r <
 20"$ region. Above this region, there's a weird behaviour in stellar age,
@@ -337,22 +348,24 @@ curve. We are not sure of its origin, or even if it is real or an artifact of
 our analysis.
 
 \item We need a more objective way of selecting the dust lane regions. Use Lick
-indices?
+indices? [*** Which ones? What are we trying to look for?]
 
 \item These objects may be in interaction, so the assumption of well--behaved
-elliptical shape may not apply.
+elliptical shape may not apply. [*** Say what Enrique found when
+looking at a larger field in SDSS images --- lots of winds around K??? ]
 
-\item We chose $v_{d,\text{target}} = 300\,km/s$ arbitrarily. How to properly
-take the velocity dispersion into account?
+\item We chose $v_{d,\text{target}} = 300\,\mathrm{km/s}$
+  arbitrarily. How do we properly take the velocity dispersion into
+  account?
 
-\item Is the dust lane really a dust curtain? Does it contain any embedded
+\item Is the dust lane really a dust screen? Does it contain any embedded
 stellar populations? This could change drastically the extinction curve.
 
 \item We can feed the intrinsic estimated spectra to \starlight and compare
 pixel-wise the stellar populations to the ones obtained using the observed dusty spectra.
 Except for $A_V$, all the results obtained should be similar.
 
-\item There's the Sodium absorption feature, visible in the lower panel of
+\item There's the sodium absorption feature, visible in the lower panel of
 Figure \ref{fig:extinctionK0708}. We should try to look at it in higher resolution,
 avoiding the velocity convolutions.
 
