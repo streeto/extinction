@@ -25,21 +25,20 @@
 \begin{document}
 \maketitle
 
-As you may or may not know, we are trying to measure the extinction
-law of dust lanes in front of some CALIFA galaxies. We developed a
-method to estimate the intrinsic spectra, behind the dust lane, and
-then compute directly $A_\lambda$ for each pixel comparing them to the
-observed ``dusty'' spectra. So far we have applied the method to K0708
-(Figure \ref{fig:sdssK0708}) and K0925 (Figure \ref{fig:sdssK0925}),
-using the cubes from pipeline 1.3c (processed by \qbick 0.3.6) with no
-binning, that is, analysing all the spaxel by spaxel. We also use
-cubes from pipelines 1.3c and 1.4 (processed by \qbick 0.4.2), using
-Voronoi binning for $S/N \geq 20$. All the spectra were \starlight-ed
-using the base Granada (\gsd [*** explain: Vazdekis MILES till age bla
-bla + Granada theoretical models]).  We were inspired by the work done by
-\citet{Holwerda2013}, who use HST and CALIFA data. Also worth
-mentioning is the paper by \citet{Wild2011}, which uses photometry and
-pairs of SDSS galaxies.
+As you may or may not know, we are trying to measure the extinction law of dust
+lanes in front of some CALIFA galaxies. We developed a method to estimate the
+intrinsic spectra, behind the dust lane, and then compute directly $A_\lambda$
+for each pixel comparing them to the observed ``dusty'' spectra. So far we have
+applied the method to K0708 (Figure \ref{fig:sdssK0708}) and K0925 (Figure
+\ref{fig:sdssK0925}), using the cubes from pipeline 1.3c (processed by \qbick
+0.3.6) with no binning, that is, analysing all the spaxel by spaxel. We also use
+cubes from pipelines 1.3c and 1.4 (processed by \qbick 0.4.2), using Voronoi
+binning for $S/N \geq 20$. All the spectra were \starlight-ed using the base
+Granada, a combination of models from \citet{Vazdekis2010} for ages older than
+$63\,Myr$ and from \citet{GonzalezDelgado2005} for younger ages (hereafter
+\gsd). We were inspired by the work done by \citet{Holwerda2013}, who use HST
+and CALIFA data. Also worth mentioning is the paper by \citet{Wild2011}, which
+uses photometry and pairs of SDSS galaxies.
 
 These are our preliminary results.
 
@@ -92,13 +91,11 @@ Overlaid on the maps are the contours of the dust regions. In gray, the masked
 region, reconstructed using the technique described in section
 \ref{sec:filling}. In black, the region used in the Figures
 \ref{fig:extinctionK0708} and \ref{fig:extinctionK0925} (see section
-\ref{}[*** to fix].
-{\em Top left}:
-logarithm of flux at $5590$--$5680\,\angstrom$.
-{\em Top right}: flux ratio between $6100$--$6500\,\angstrom$ and
-$4000$--$4500\,\angstrom$. {\em Bottom left}: extinction $A_V$ fitted by
-\starlight. {\em Bottom right}: mean of the logarithm of stellar age, weighted
-by flux.}
+\ref{sec:extinction}). {\em Top left}: logarithm of flux at
+$5590$--$5680\,\angstrom$. {\em Top right}: flux ratio between
+$6100$--$6500\,\angstrom$ and $4000$--$4500\,\angstrom$. {\em Bottom left}:
+extinction $A_V$ fitted by \starlight. {\em Bottom right}: mean of the logarithm
+of stellar age, weighted by flux.}
 
 \label{fig:mapsK0708}
 \end{figure}
@@ -171,11 +168,15 @@ obtain the map of the extinction.
 
 
 \section{Calculating and fitting the extinction}
-
-Considering the dust is in front of the galaxy, the optical depth can be
-calculated as
+\label{sec:extinction}
+Considering a dust screen model, the observed flux is related to the intrinsic
+by
 \begin{equation}
-\tau_\lambda = \ln \frac{F^\text{obs}_\lambda}{F^\text{intr}_\lambda}.
+F^\text{obs}_\lambda = F^\text{intr}_\lambda e^{-\tau_\lambda}.
+\end{equation}
+Reorganizing to calculate the optical depth,
+\begin{equation}
+\tau_\lambda = \ln \frac{F^\text{intr}_\lambda}{F^\text{obs}_\lambda}.
 \end{equation}
 This relates to the extinction by the following:
 \begin{equation}
@@ -259,28 +260,32 @@ radial ring, which may raise some eyebrows. In our defense, radial profiles are
 easier to visualize and compare than maps; as this is just a first look into the
 subject, we apologize for the lack of rigor.
 
+% *** Natalia: I don't think this tests if the dust screen hypothesis is
+% valid. We are testing if a dust screen model with the same intrinsic SSPs might
+% be valid, but both things are being tested together and, given the degeneracies
+% in age--attenuation, even if we find this model is a good fit this does not mean
+% the real world is like this.
+
 In the same Figures we present the average stellar age (top right), $D_n(4000)$
 (bottom left), and the flux ratio used in the selection of the dust lane (bottom
-right). [*** I don't think this tests if the dust screen hypothesis is
-valid. We are testing if a dust screen model with the same intrinsic
-SSPs might be valid, but both things are being tested together and,
-given the degeneracies in age--attenuation, even if we find this model
-is a good fit this does not mean the real world is like this.]
-These were plotted to help assert whether treating the dust lane as a
+right). These were plotted to help assert whether treating the dust lane as a
 dust screen is a valid hypothesis\footnote{Other spectral indices could
-(should?) also be used.}. If the dust lane should contain any embedded or
-foreground stellar populations, the radial profiles for mean stellar age and
-$D_n(4000)$ in the dust region and in the rest of the galaxy would not match. On
-the other hand, if the dust lane really consists of a dust screen, these
-properties should be the same in those two regions. The latter is true for $r <
-15"$ in the case of K0708 and for $10" < r < 20"$ in the case of K0925. Outside
-these regions the mean stellar age and $D_n(4000)$ look quite different. This is
-probably caused by wrongly selected regions, including, for instance,
-contamination near the masked circle in K0925. Still in K0925, even in the
-``good'' section there's a slight decrease ($\sim 0.2\,dex$) in stellar age, and
-some variations in $D_n(4000)$.
+(should?) also be used.}, but they are surely not enough. We have to find a
+suitable way to at least check if the dust lane hypotheis is {\em obviously}
+wrong. For now, let's follow the argument using these indices to see what we
+get. If the dust lane should contain any embedded or foreground stellar
+populations, the radial profiles for mean stellar age and $D_n(4000)$ in the
+dust region and in the rest of the galaxy would not match. On the other hand, if
+the dust lane really consists of a dust screen, these properties should be the
+same in those two regions. The latter is true for $r < 15"$ in the case of K0708
+and for $10" < r < 20"$ in the case of K0925. Outside these regions the mean
+stellar age and $D_n(4000)$ look quite different. This is probably caused by
+wrongly selected regions, including, for instance, contamination near the masked
+circle in K0925. Still in K0925, even in the ``good'' section there's a slight
+decrease ($\sim 0.2\,dex$) in stellar age, and some variations in $D_n(4000)$.
 
 %TODO: is the decrease enough to discard K0925?
+% *** Andre: This has everything to do with Natalia's comment above.
 
 \begin{figure}
 \includegraphics{figures/radprof_K0708_1.3c_v01.pdf}
@@ -347,12 +352,14 @@ To summarize the findings, questions and possible paths:
 curve. We are not sure of its origin, or even if it is real or an artifact of
 our analysis.
 
-\item We need a more objective way of selecting the dust lane regions. Use Lick
-indices? [*** Which ones? What are we trying to look for?]
+\item We need a more objective way of selecting the dust lane regions.
+% Use Lick indices?
+% *** Natalia: Which ones? What are we trying to look for?
 
 \item These objects may be in interaction, so the assumption of well--behaved
-elliptical shape may not apply. [*** Say what Enrique found when
-looking at a larger field in SDSS images --- lots of winds around K??? ]
+elliptical shape may not apply. As pointed out by Enrique Pérez Jiménez, the
+Figure \ref{fig:sdssK0925_enh} shows what could be a ring around K0925,
+indicating that this galaxy could be in interaction.
 
 \item We chose $v_{d,\text{target}} = 300\,\mathrm{km/s}$
   arbitrarily. How do we properly take the velocity dispersion into
@@ -380,6 +387,15 @@ dust lane spaxels.
 
 \end{itemize}
 
+\begin{figure}
+\begin{center}
+\includegraphics[width=0.6\columnwidth]{figures/K0925_enh.png}
+\end{center}
+
+\caption{Image from SDSS showing the vecinity of K0925 (NGC 7722). The contrast
+was changed to show streams or patterns that could indicate an interaction.}
+\label{fig:sdssK0925_enh}
+\end{figure}
 
 \bibliography{references}
 
