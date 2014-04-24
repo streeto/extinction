@@ -1,8 +1,9 @@
 from pycasso import fitsQ3DataCube
 import numpy as np
 import matplotlib.pyplot as plt
-from pystarlight.util.velocity_fix import SpectraVelocityFixer
 from matplotlib import gridspec
+from matplotlib.backends.backend_pdf import PdfPages
+from pystarlight.util.velocity_fix import SpectraVelocityFixer
 from pystarlight.util.redenninglaws import Cardelli_RedLaw, Calzetti_RedLaw
 from pycasso.util import get_polygon_mask
 import argparse
