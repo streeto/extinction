@@ -330,7 +330,52 @@ for zz in xrange(n_lane_pix):
         fit_A_V__z[zz] = _ccm_A__l.A_V.value
 fit_A_V__yx[dust_lane__yx] = fit_A_V__z
 
+
+# Plot A_V maps.
+fig_height = 0.9 * fig_width
+f = plt.figure(3, figsize=(fig_width, fig_height))
+gs = gridspec.GridSpec(2, 2, width_ratios=[1, 1], height_ratios=[1, 1])
+plt.suptitle('$A_V$ maps - %s (%s) - pipeline %s - Voronoi %d' % (K.galaxyName, calId, pipeVer, sn_vor), fontsize=10)
+
+ax_SL_lane = plt.subplot(gs[0,0])
+im = ax_SL_lane.imshow(lane_A_V__yx, cmap='Reds', vmin=vmin_A_V[calId], vmax=vmax_A_V[calId])
+ax_SL_lane.contour(mask_image, levels=[1.9, 2.9], colors=['gray', 'k'], linewidths=1.5)
+ax_SL_lane.set_xticklabels([])
+ax_SL_lane.set_yticklabels([])
+plt.colorbar(im, ax=ax_SL_lane)
+ax_SL_lane.set_title(r'STARLIGHT (lane only)')
+
+ax_SL_galaxy = plt.subplot(gs[0,1])
+im = ax_SL_galaxy.imshow(K.A_V__yx, cmap='Reds', vmin=vmin_A_V[calId], vmax=vmax_A_V[calId])
+ax_SL_galaxy.contour(mask_image, levels=[1.9, 2.9], colors=['gray', 'k'], linewidths=1.5)
+ax_SL_galaxy.set_xticklabels([])
+ax_SL_galaxy.set_yticklabels([])
+plt.colorbar(im, ax=ax_SL_galaxy)
+ax_SL_galaxy.set_title(r'STARLIGHT')
+
+ax_fit = plt.subplot(gs[1,0])
+im = ax_fit.imshow(fit_A_V__yx, cmap='Reds', vmin=vmin_A_V[calId], vmax=vmax_A_V[calId])
+ax_fit.contour(mask_image, levels=[1.9, 2.9], colors=['gray', 'k'], linewidths=1.5)
+ax_fit.set_xticklabels([])
+ax_fit.set_yticklabels([])
+plt.colorbar(im, ax=ax_fit)
+ax_fit.set_title(r'Fitted (lane only)')
+
+ax_SL_fit = plt.subplot(gs[1,1])
+lala = np.zeros_like(K.A_V__yx)
+lala[dust_lane__yx] = fit_A_V__yx[dust_lane__yx]
+im = ax_SL_fit.imshow(K.A_V__yx - lala, cmap='Reds', vmin=vmin_A_V[calId], vmax=vmax_A_V[calId])
+ax_SL_fit.contour(mask_image, levels=[1.9, 2.9], colors=['gray', 'k'], linewidths=1.5)
+ax_SL_fit.set_xticklabels([])
+ax_SL_fit.set_yticklabels([])
+plt.colorbar(im, ax=ax_SL_fit)
+ax_SL_fit.set_title(r'STARLIGHT - Fitted')
+
+gs.tight_layout(f, rect=[0, 0, 1, 0.97])
 pdf.savefig(f)
+plt.savefig('%s/avmaps_%s_%s_v%02d.pdf' % (args.outdir, calId, pipeVer, sn_vor))
+
+# Plot radial profiles
 rp_mode = 'mean'
 lane_A_V__r = K.radialProfile(lane_A_V__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode=rp_mode, mask=dust_region__yx)
 fit_A_V__r = K.radialProfile(fit_A_V__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode=rp_mode, mask=dust_region__yx)
