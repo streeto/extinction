@@ -85,6 +85,7 @@ for i in xrange(10):
     img, mask = K.fillImage(img)
     pa, ba = K.getEllipseParams(img, mask)
     K.setGeometry(pa, ba)
+pdf = PdfPages('%s/%s_%s_v%02d.pdf' % (args.outdir, calId, pipeVer, sn_vor))
 
 plt.ioff()
 plt.rcParams['axes.labelsize'] = 8
@@ -143,8 +144,8 @@ plt.colorbar(im, ax=ax_im3)
 ax_im3.set_title(r'$\langle \log t \rangle_L$')
 
 gs.tight_layout(f, rect=[0, 0, 1, 0.97])
+pdf.savefig(f)
 plt.savefig('%s/maps_%s_%s_v%02d.pdf' % (args.outdir, calId, pipeVer, sn_vor))  
-# plt.show()
 
 
 mean_starlight_A_V = K.A_V__yx[dust_region__yx].mean()
@@ -263,8 +264,9 @@ ax_ext.set_ylabel(r'$A_\lambda$')
 ax_ext.legend(loc='lower left')
 
 gs.tight_layout(f, rect=[0, -0.04, 1, 0.99])  
+pdf.savefig(f)
 plt.savefig('%s/spectra_%s_%s_v%02d.pdf' % (args.outdir, calId, pipeVer, sn_vor))  
-# plt.show()
+
 
 # Plot radial profiles
 distance__yx = np.ma.masked_where(dust_lane__yx | ~K.qMask, K.pixelDistance__yx, copy=True)
@@ -297,6 +299,7 @@ for zz in xrange(n_lane_pix):
         fit_A_V__z[zz] = _ccm_A__l.A_V.value
 fit_A_V__yx[dust_lane__yx] = fit_A_V__z
 
+pdf.savefig(f)
 rp_mode = 'mean'
 lane_A_V__r = K.radialProfile(lane_A_V__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode=rp_mode)
 fit_A_V__r = K.radialProfile(fit_A_V__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode=rp_mode)
@@ -354,5 +357,10 @@ ax_cl.set_ylabel(r'Flux ratio $(6300 / 4250)$')
 ax_cl.set_xlim(0, bins.max())
 
 gs.tight_layout(f, rect=[0, -0.04, 1, 0.99])  
+pdf.savefig(f)
 plt.savefig('%s/radprof_%s_%s_v%02d.pdf' % (args.outdir, calId, pipeVer, sn_vor))
-# plt.show()
+
+pdf.savefig(f)
+
+pdf.close()
+
