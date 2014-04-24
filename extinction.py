@@ -220,21 +220,6 @@ clean_int_spec = np.median(f_clean__lyx[..., dust_region__yx], axis=1)
 dusty_int_spec[bad_lambda] = np.ma.masked
 clean_int_spec[bad_lambda] = np.ma.masked
 
-# Plot the spectra and extinction.
-fig_height = 0.9 * fig_width
-f = plt.figure(2, figsize=(fig_width, fig_height))
-gs = gridspec.GridSpec(2, 1, width_ratios=[1, ], height_ratios=[1, 1])
-plt.suptitle('Extinction - %s (%s) - pipeline %s - Voronoi %d' % (K.galaxyName, calId, pipeVer, sn_vor), fontsize=10)
-
-ax_spec = plt.subplot(gs[0, 0])
-ax_spec.plot(K.l_obs, dusty_int_spec, 'r-', lw=lw, label='dust lane')
-ax_spec.plot(K.l_obs, clean_int_spec, 'b-', lw=lw, label='intrinsic')
-ax_spec.set_xticklabels([])
-ax_spec.set_ylabel(r'Flux')
-ax_spec.set_xlim(K.l_obs.min(), K.l_obs.max())
-ax_spec.set_ylim(0.0, clean_int_spec.max())
-ax_spec.legend(loc='lower right')
-
 # tau_lambda of the integrated spectra in the dusty pixels.
 tau__l = np.log(clean_int_spec / dusty_int_spec)
 A__l = tau__l * almost_one
@@ -274,6 +259,22 @@ _model = cal_reddening(R_V=4.05, A_V=mean_starlight_A_V)
 _model.R_V.fixed = True
 RV405cal_A__l = fit(_model, K.l_obs[fitmask], A__l[fitmask])
 print RV405cal_A__l
+
+# Plot the spectra.
+fig_height = 0.9 * fig_width
+f = plt.figure(2, figsize=(fig_width, fig_height))
+gs = gridspec.GridSpec(2, 1, width_ratios=[1, ], height_ratios=[1, 1])
+plt.suptitle('Extinction - %s (%s) - pipeline %s - Voronoi %d' % (K.galaxyName, calId, pipeVer, sn_vor), fontsize=10)
+
+ax_spec = plt.subplot(gs[0, 0])
+ax_spec.plot(K.l_obs, dusty_int_spec, 'r-', lw=lw, label='dust lane')
+ax_spec.plot(K.l_obs, clean_int_spec, 'b-', lw=lw, label='intrinsic')
+ax_spec.plot(K.l_obs, 10 * (dusty_int_spec - clean_int_spec * 10**(-0.4*ccm_A__l(K.l_obs))), 'k-', lw=lw, label=r'residual ($\times 10$)')
+ax_spec.set_xticklabels([])
+ax_spec.set_ylabel(r'Flux')
+ax_spec.set_xlim(K.l_obs.min(), K.l_obs.max())
+ax_spec.set_ylim(0.0, clean_int_spec.max())
+ax_spec.legend(loc='upper left')
 
 # Plot the extinction curves.
 ax_ext = plt.subplot(gs[1, 0])
