@@ -49,6 +49,9 @@ class PolyGrabber:
             self.changeCLim(dmax=0.05)
         elif ev.key == 'enter':
             self.dumpPoly()
+        elif ev.key == ' ':
+            vmin, vmax = self.curImage.get_clim()
+            print 'vmin=%.2f, vmax=%.2f' % (vmin, vmax)            
         self.redraw()
 
     
@@ -129,6 +132,8 @@ Right click deletes the last point.
 The keys z, x decrease or increase the vmin of the current image.
 The keys c, v decrease or increase the vmax of the current image.
  
+Press <space> to print vmin & vmax of the current image.
+
 Press <enter> when done, it will print the polygon as a python list.
 
 
