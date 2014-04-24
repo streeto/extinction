@@ -332,12 +332,12 @@ fit_A_V__yx[dust_lane__yx] = fit_A_V__z
 
 pdf.savefig(f)
 rp_mode = 'mean'
-lane_A_V__r = K.radialProfile(lane_A_V__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode=rp_mode)
-fit_A_V__r = K.radialProfile(fit_A_V__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode=rp_mode)
-lane_at_flux__r = K.radialProfile(lane_at_flux__yx * lane_LobnSD__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode='sum') \
-    / K.radialProfile(lane_LobnSD__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode='sum')
-lane_Dn4000__r = K.radialProfile(lane_Dn4000__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode=rp_mode)
-lane_color__r = K.radialProfile(lane_color__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode=rp_mode)
+lane_A_V__r = K.radialProfile(lane_A_V__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode=rp_mode, mask=dust_region__yx)
+fit_A_V__r = K.radialProfile(fit_A_V__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode=rp_mode, mask=dust_region__yx)
+lane_at_flux__r = K.radialProfile(lane_at_flux__yx * lane_LobnSD__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode='sum', mask=dust_region__yx) \
+    / K.radialProfile(lane_LobnSD__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode='sum', mask=dust_region__yx)
+lane_Dn4000__r = K.radialProfile(lane_Dn4000__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode=rp_mode, mask=dust_region__yx)
+lane_color__r = K.radialProfile(lane_color__yx, bin_r=bins_lane, r__yx=lane_distance__yx, rad_scale=1, mode=rp_mode, mask=dust_region__yx)
 
 A_V__r = K.radialProfile(A_V__yx, bin_r=bins, r__yx=distance__yx, rad_scale=1, mode=rp_mode)
 at_flux__r = K.radialProfile(at_flux__yx * LobnSD__yx, bin_r=bins, r__yx=distance__yx, rad_scale=1, mode='sum') \
@@ -347,7 +347,7 @@ color__r = K.radialProfile(color__yx, bin_r=bins, r__yx=distance__yx, rad_scale=
 
 plt.rcParams['legend.fontsize'] = 6
 fig_height = fig_width * 0.75
-f = plt.figure(3, figsize=(fig_width, fig_height))
+f = plt.figure(4, figsize=(fig_width, fig_height))
 gs = gridspec.GridSpec(2, 2, width_ratios=[1, 1], height_ratios=[1, 1])
 plt.suptitle('Radial profiles - %s (%s) - pipeline %s - Voronoi %d' % (K.galaxyName, calId, pipeVer, sn_vor), fontsize=10)
 
