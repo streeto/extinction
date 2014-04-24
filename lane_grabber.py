@@ -116,9 +116,11 @@ K = fitsQ3DataCube(args.db[0])
 plt.ioff()
 f = plt.figure(1, figsize=(7,7))
 ax = f.add_subplot(111)
-ax.imshow(K.qSignal, cmap='jet', label=r'Image @ $5635 \AA$')
-ax.imshow(K.A_V__yx, cmap='jet', vmin=0.0, vmax=2.0, label=r'$A_V$')
-im = ax.imshow(K.fluxRatio__yx(4000, 4500, 6100, 6500), vmin=0.5, vmax=1.0, cmap='jet',
+ax.imshow(K.qSignal, cmap='Blues', label=r'Image @ $5635 \AA$')
+ax.imshow(K.A_V__yx, cmap='Reds', vmin=0.0, vmax=2.0, label=r'$A_V$')
+ax.imshow(K.at_flux__yx, cmap='Reds', vmin=9.0, vmax=11.0, label=r'$\langle \log t \rangle_L$')
+ax.imshow(K.Dn4000__yx, cmap='Reds', vmin=0.0, vmax=2.0, label=r'$D_n(4000)$')
+im = ax.imshow(K.fluxRatio__yx(6100, 6500, 4000, 4500), vmin=0.5, vmax=2.0, cmap='RdBu_r',
                label=r'Flux ratio ($F_{6300\AA} / F_{4250\AA})$')
 ax.set_title(im.get_label())
 
