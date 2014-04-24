@@ -85,6 +85,24 @@ vmax_at = {'K0925': 10.25,
            'K0850': 10.25,
            }
 
+vmin_v0 = {'K0925': -250,
+           'K0708': -250,
+           'K0850': -250,
+           }
+vmax_v0 = {'K0925': 250,
+           'K0708': 250,
+           'K0850': 250,
+           }
+
+vmin_vd = {'K0925': 0,
+           'K0708': 0,
+           'K0850': 0,
+           }
+vmax_vd = {'K0925': 300,
+           'K0708': 300,
+           'K0850': 300,
+           }
+
 # Compute bit masks.
 dust_lane__yx = get_polygon_mask(dust_lane_poly[calId], K.qSignal.shape) & (K.pixelDistance__yx > 3) & K.qMask
 dust_region__yx = get_polygon_mask(dust_region_poly[calId], K.qSignal.shape) & (K.pixelDistance__yx > 3) & K.qMask
@@ -373,7 +391,31 @@ gs.tight_layout(f, rect=[0, -0.04, 1, 0.99])
 pdf.savefig(f)
 plt.savefig('%s/radprof_%s_%s_v%02d.pdf' % (args.outdir, calId, pipeVer, sn_vor))
 
+
+fig_height = 0.5 * fig_width
+
+# Plot some diagnostic maps.
+f = plt.figure(9, figsize=(fig_width, fig_height))
+gs = gridspec.GridSpec(1, 2, width_ratios=[1, 1], height_ratios=[1])
+plt.suptitle('Kinematics - %s (%s) - pipeline %s - Voronoi %s' % (K.galaxyName, calId, pipeVer, sn_vor), fontsize=10)
+
+ax_im0 = plt.subplot(gs[0, 0])
+im = ax_im0.imshow(K.v_0__yx, cmap='RdBu', vmin=vmin_v0[calId], vmax=vmax_v0[calId])
+ax_im0.set_xticks([])
+ax_im0.set_yticks([])
+plt.colorbar(im, ax=ax_im0)
+ax_im0.set_title(r'$v_0\ [km/s]$')
+
+ax_im1 = plt.subplot(gs[0, 1])
+im = ax_im1.imshow(K.v_d__yx, cmap='OrRd', vmin=vmin_vd[calId], vmax=vmax_vd[calId])
+ax_im1.set_xticks([])
+ax_im1.set_yticks([])
+plt.colorbar(im, ax=ax_im1)
+ax_im1.set_title(r'$v_d\ [km/s]$')
+
+gs.tight_layout(f, rect=[0, 0, 1, 0.97])
 pdf.savefig(f)
+plt.savefig('%s/kinematics_%s_%s_v%02d.pdf' % (args.outdir, calId, pipeVer, sn_vor))  
 
 pdf.close()
 
