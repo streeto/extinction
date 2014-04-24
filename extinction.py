@@ -438,6 +438,57 @@ pdf.savefig(f)
 plt.savefig('%s/radprof_%s_%s_v%02d.pdf' % (args.outdir, calId, pipeVer, sn_vor))
 
 
+fig_height = fig_width * 0.75
+f = plt.figure(5, figsize=(fig_width, fig_height))
+gs = gridspec.GridSpec(1, 1)
+ax = plt.subplot(gs[0, 0])
+im = ax.imshow(K.color__yx, cmap='RdBu_r', vmin=vmin_color[calId], vmax=vmax_color[calId])
+ax.set_xticks([])
+ax.set_yticks([])
+plt.colorbar(im, ax=ax)
+ax.set_title(r'"Color" ($F_{6300\AA} / F_{4250\AA})$')
+gs.tight_layout(f)  
+pdf.savefig(f)
+plt.savefig('%s/fill1_%s_%s_v%s02d.pdf' % (args.outdir, calId, pipeVer, sn_vor))
+
+f = plt.figure(6, figsize=(fig_width, fig_height))
+gs = gridspec.GridSpec(1, 1)
+ax = plt.subplot(gs[0, 0])
+im = ax.imshow(color__yx, cmap='RdBu_r', vmin=vmin_color[calId], vmax=vmax_color[calId])
+ax.set_xticks([])
+ax.set_yticks([])
+plt.colorbar(im, ax=ax)
+ax.set_title(r'"Color" ($F_{6300\AA} / F_{4250\AA})$')
+gs.tight_layout(f)  
+pdf.savefig(f)
+plt.savefig('%s/fill2_%s_%s_v%02d.pdf' % (args.outdir, calId, pipeVer, sn_vor))
+
+filled_color__yx, mask = K.fillImage(color__yx)
+f = plt.figure(7, figsize=(fig_width, fig_height))
+gs = gridspec.GridSpec(1, 1)
+ax = plt.subplot(gs[0, 0])
+im = ax.imshow(filled_color__yx, cmap='RdBu_r', vmin=vmin_color[calId], vmax=vmax_color[calId])
+ax.set_xticks([])
+ax.set_yticks([])
+plt.colorbar(im, ax=ax)
+ax.set_title(r'"Color" ($F_{6300\AA} / F_{4250\AA})$')
+gs.tight_layout(f)  
+pdf.savefig(f)
+plt.savefig('%s/fill3_%s_%s_v%02d.pdf' % (args.outdir, calId, pipeVer, sn_vor))
+
+f = plt.figure(8, figsize=(4, 3))
+gs = gridspec.GridSpec(1, 1)
+ax = plt.subplot(gs[0, 0])
+ax.plot(bins_center, color__r, 'k-', lw=lw)
+ax.set_xlabel(r'radius [arcsec]')
+ax.set_ylabel(r'$F_{6300\AA} / F_{4250\AA})$')
+ax.set_xlim(0, bins.max())
+ax.set_title(r'Radial profile of color ($F_{6300\AA} / F_{4250\AA})$')
+gs.tight_layout(f)  
+pdf.savefig(f)
+plt.savefig('%s/radprof_color_%s_%s_v%02d.pdf' % (args.outdir, calId, pipeVer, sn_vor))
+
+
 fig_height = 0.5 * fig_width
 
 # Plot some diagnostic maps.
